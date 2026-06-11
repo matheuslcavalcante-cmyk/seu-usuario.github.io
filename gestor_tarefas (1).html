@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestor de Tarefas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        header .logo-container {
+            margin-bottom: 20px;
+        }
+        
+        header .logo-container img {
+            max-height: 100px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        
+        header h1 { font-size: 36px; margin-bottom: 8px; }
+        header .secretaria { font-size: 16px; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; }
+        header p { font-size: 14px; opacity: 0.9; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            min-height: 75vh;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            overflow-y: auto;
+            max-height: 75vh;
+        }
+        
+        .panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .panel::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .panel::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 10px;
+        }
+        
+        .panel h2 {
+            color: #10b981;
+            font-size: 22px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #10b981;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #047857;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1fae5;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #333;
+            background: #f0fdf4;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            background: white;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        
+        .checkbox-group {
+            background: #f0fdf4;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #d1fae5;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            color: #047857;
+            font-size: 14px;
+        }
+        
+        .checkbox-item input {
+            width: auto;
+            margin: 0;
+            accent-color: #10b981;
+            cursor: pointer;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-add:active {
+            transform: translateY(0);
+        }
+        
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .task-card {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+        
+        .task-card:hover {
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .task-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #047857;
+            margin-bottom: 8px;
+        }
+        
+        .task-desc {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+        
+        .task-info {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #0369a1;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-left: 3px solid #0369a1;
+        }
+        
+        .task-people {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .person-badge {
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .task-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            width: auto;
+            margin: 0;
+            font-size: 13px;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            width: auto;
+            margin: 0;
+            font-size: 13px;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+
+        .btn-cancelar {
+            background: #9ca3af;
+            color: white;
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-cancelar:hover {
+            background: #6b7280;
+        }
+
+        .badge-edicao {
+            display: none;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .badge-edicao.ativo {
+            display: block;
+        }
+        
+        .semanas-config {
+            background: #ecfdf5;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #d1fae5;
+            margin-bottom: 20px;
+        }
+
+        .semanas-config h3 {
+            color: #047857;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .semana-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .semana-input label {
+            margin-bottom: 0;
+            font-size: 12px;
+        }
+
+        .semana-input input {
+            margin: 0;
+            padding: 8px;
+        }
+        
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container" id="logoContainer">
+                <svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="60,40 100,20 100,100 60,120" fill="#059669" />
+                    <polygon points="40,60 60,40 100,60 80,80" fill="#10b981" />
+                    <polygon points="40,60 80,80 80,160 40,140" fill="#10b981" />
+                    <polygon points="100,20 140,40 140,120 100,100" fill="#10b981" />
+                    <polygon points="100,100 140,120 120,160 80,140" fill="#059669" />
+                    <polygon points="140,40 180,60 180,140 140,120" fill="#3b82f6" />
+                    <polygon points="140,120 180,140 160,180 120,160" fill="#0369a1" />
+                    <polygon points="100,100 140,120 120,160 80,140" fill="#06b6d4" />
+                </svg>
+                <input type="file" id="logoUpload" accept="image/*" style="display:none;" onchange="trocarLogo(event)">
+            </div>
+            <small style="color: #d0f0e0; font-size: 11px; cursor: pointer; display: block; margin-top: 10px;" onclick="document.getElementById('logoUpload').click()">Clique aqui para fazer upload do logo</small>
+            <div class="secretaria">Secretaria da Corregedoria-Geral</div>
+            <h1>Gestor de Tarefas</h1>
+        </header>
+
+        <div class="grid">
+            <!-- ESQUERDA: FORMULÁRIO -->
+            <div class="panel">
+                <div id="badgeEdicao" class="badge-edicao">✏️ Editando tarefa</div>
+                
+                <h2>👥 Equipe de Responsáveis</h2>
+                
+                <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #10b981;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="color: #047857; font-size: 13px;"><strong>1.</strong> Secretário Matheus</div>
+                        <div style="color: #047857; font-size: 13px;"><strong>2.</strong> Assistente Luciana</div>
+                        <div style="color: #047857; font-size: 13px;"><strong>3.</strong> Assistente Larissa</div>
+                        <div style="color: #047857; font-size: 13px;"><strong>4.</strong> Residente Letícia</div>
+                        <div style="color: #047857; font-size: 13px;"><strong>5.</strong> Residente Renata</div>
+                        <div style="color: #047857; font-size: 13px;"><strong>6.</strong> Estagiária de Graduação</div>
+                    </div>
+                </div>
+
+                <div class="semanas-config">
+                    <h3>📅 Configurar Dias das Semanas</h3>
+                    <div class="semana-input">
+                        <div>
+                            <label>Semana 1</label>
+                            <input type="text" id="semana1" value="1-7" placeholder="Ex: 1-7">
+                        </div>
+                        <div>
+                            <label>Semana 2</label>
+                            <input type="text" id="semana2" value="8-14" placeholder="Ex: 8-14">
+                        </div>
+                    </div>
+                    <div class="semana-input">
+                        <div>
+                            <label>Semana 3</label>
+                            <input type="text" id="semana3" value="15-21" placeholder="Ex: 15-21">
+                        </div>
+                        <div>
+                            <label>Semana 4</label>
+                            <input type="text" id="semana4" value="22-28" placeholder="Ex: 22-28">
+                        </div>
+                    </div>
+                    <div class="semana-input">
+                        <div style="grid-column: 1;">
+                            <label>Semana 5</label>
+                            <input type="text" id="semana5" value="29-31" placeholder="Ex: 29-31">
+                        </div>
+                    </div>
+                </div>
+                
+                <h2>➕ Adicionar Tarefa</h2>
+                
+                <div class="form-group">
+                    <label>Título da Tarefa</label>
+                    <input type="text" id="tit" placeholder="Ex: Responder emails dos assistidos">
+                </div>
+                
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="desc" placeholder="Detalhes adicionais da tarefa..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Mês</label>
+                    <select id="mes">
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Semana</label>
+                    <select id="sem">
+                        <option value="1">Semana 1 (1-7)</option>
+                        <option value="2">Semana 2 (8-14)</option>
+                        <option value="3">Semana 3 (15-21)</option>
+                        <option value="4">Semana 4 (22-28)</option>
+                        <option value="5">Semana 5 (29-31)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Responsáveis</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" value="1" id="p1">
+                            <label for="p1" style="margin: 0;">Secretário Matheus</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" value="2" id="p2">
+                            <label for="p2" style="margin: 0;">Assistente Luciana</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" value="3" id="p3">
+                            <label for="p3" style="margin: 0;">Assistente Larissa</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" value="4" id="p4">
+                            <label for="p4" style="margin: 0;">Residente Letícia</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" value="5" id="p5">
+                            <label for="p5" style="margin: 0;">Residente Renata</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" value="6" id="p6">
+                            <label for="p6" style="margin: 0;">Estagiária de Graduação</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="btnPrincipal" class="btn-add" onclick="adicionar()">✨ Adicionar Tarefa</button>
+                <button id="btnCancelar" class="btn-cancelar" onclick="cancelarEdicao()" style="display: none;">❌ Cancelar Edição</button>
+            </div>
+
+            <!-- DIREITA: TAREFAS -->
+            <div class="panel">
+                <h2>📅 Programação</h2>
+                
+                <div class="form-group">
+                    <label>Filtrar por Mês</label>
+                    <select id="mesFiltro" onchange="mostrar()">
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+
+                <div class="tasks-list" id="list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nomes = { 1: 'Matheus', 2: 'Luciana', 3: 'Larissa', 4: 'Letícia', 5: 'Renata', 6: 'Estagiária' };
+        const meses = { 1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro' };
+        let tarefas = [];
+        let diasSemanas = {
+            1: '1-7',
+            2: '8-14',
+            3: '15-21',
+            4: '22-28',
+            5: '29-31'
+        };
+        let modoEdicao = false;
+        let idEdicao = null;
+
+        function trocarLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '120px';
+                    img.style.height = '120px';
+                    img.style.objectFit = 'contain';
+                    img.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))';
+                    
+                    const container = document.getElementById('logoContainer');
+                    container.innerHTML = '';
+                    container.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function atualizarSemanas() {
+            diasSemanas[1] = document.getElementById('semana1').value || '1-7';
+            diasSemanas[2] = document.getElementById('semana2').value || '8-14';
+            diasSemanas[3] = document.getElementById('semana3').value || '15-21';
+            diasSemanas[4] = document.getElementById('semana4').value || '22-28';
+            diasSemanas[5] = document.getElementById('semana5').value || '29-31';
+            
+            atualizarSelectSemanas();
+            mostrar();
+        }
+
+        function atualizarSelectSemanas() {
+            const select = document.getElementById('sem');
+            select.innerHTML = `
+                <option value="1">Semana 1 (${diasSemanas[1]})</option>
+                <option value="2">Semana 2 (${diasSemanas[2]})</option>
+                <option value="3">Semana 3 (${diasSemanas[3]})</option>
+                <option value="4">Semana 4 (${diasSemanas[4]})</option>
+                <option value="5">Semana 5 (${diasSemanas[5]})</option>
+            `;
+        }
+
+        function editarTarefa(id) {
+            const tarefa = tarefas.find(t => t.id === id);
+            if (!tarefa) return;
+
+            // Preencher os campos
+            document.getElementById('tit').value = tarefa.tit;
+            document.getElementById('desc').value = tarefa.desc;
+            document.getElementById('mes').value = tarefa.mes;
+            document.getElementById('sem').value = tarefa.sem;
+
+            // Desmarcar todos
+            document.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+
+            // Marcar responsáveis
+            tarefa.pess.forEach(p => {
+                const checkbox = document.getElementById('p' + p);
+                if (checkbox) checkbox.checked = true;
+            });
+
+            // Ativar modo edição
+            modoEdicao = true;
+            idEdicao = id;
+            
+            document.getElementById('badgeEdicao').classList.add('ativo');
+            document.getElementById('btnCancelar').style.display = 'block';
+            document.getElementById('btnPrincipal').textContent = '💾 Salvar Alterações';
+            document.getElementById('btnPrincipal').style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+
+            // Scroll
+            document.querySelector('.panel').scrollTop = 0;
+        }
+
+        function cancelarEdicao() {
+            modoEdicao = false;
+            idEdicao = null;
+            
+            document.getElementById('badgeEdicao').classList.remove('ativo');
+            document.getElementById('btnCancelar').style.display = 'none';
+            document.getElementById('btnPrincipal').textContent = '✨ Adicionar Tarefa';
+            document.getElementById('btnPrincipal').style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            
+            // Limpar
+            document.getElementById('tit').value = '';
+            document.getElementById('desc').value = '';
+            document.getElementById('mes').value = '1';
+            document.getElementById('sem').value = '1';
+            document.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+        }
+
+        function adicionar() {
+            const tit = document.getElementById('tit').value.trim();
+            const desc = document.getElementById('desc').value.trim();
+            const mes = document.getElementById('mes').value;
+            const sem = document.getElementById('sem').value;
+            
+            const chks = document.querySelectorAll('input[type=checkbox]:checked');
+            const pess = [];
+            chks.forEach(c => pess.push(c.value));
+
+            if (!tit) { 
+                alert('Por favor, preencha o título da tarefa!'); 
+                return; 
+            }
+            
+            if (pess.length === 0) { 
+                alert('Por favor, selecione pelo menos uma pessoa!'); 
+                return; 
+            }
+
+            if (modoEdicao) {
+                // Atualizar
+                const idx = tarefas.findIndex(t => t.id === idEdicao);
+                if (idx !== -1) {
+                    tarefas[idx] = { id: idEdicao, tit, desc, mes: parseInt(mes), sem: parseInt(sem), pess };
+                }
+                cancelarEdicao();
+            } else {
+                // Adicionar novo
+                tarefas.push({ id: Date.now(), tit, desc, mes: parseInt(mes), sem: parseInt(sem), pess });
+                document.getElementById('tit').value = '';
+                document.getElementById('desc').value = '';
+                document.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+            }
+            
+            mostrar();
+        }
+
+        function deletar(id) {
+            if (!confirm('Tem certeza que deseja deletar esta tarefa?')) return;
+            tarefas = tarefas.filter(t => t.id !== id);
+            mostrar();
+        }
+
+        function mostrar() {
+            const mesFiltro = parseInt(document.getElementById('mesFiltro').value);
+            const tarefasFiltradas = tarefas.filter(t => t.mes === mesFiltro);
+            
+            let html = '';
+            if (tarefasFiltradas.length === 0) {
+                html = '<div class="empty">Nenhuma tarefa criada para este mês. 🎯</div>';
+            } else {
+                tarefasFiltradas.forEach(t => {
+                    html += `
+                        <div class="task-card">
+                            <div class="task-title">${t.tit}</div>
+                            ${t.desc ? `<div class="task-desc">${t.desc}</div>` : ''}
+                            <div class="task-info">📆 Semana ${t.sem} (${diasSemanas[t.sem]})</div>
+                            <div class="task-people">
+                                ${t.pess.map(p => `<div class="person-badge">👤 ${nomes[p]}</div>`).join('')}
+                            </div>
+                            <div class="task-buttons">
+                                <button class="btn-edit" onclick="editarTarefa(${t.id})">✏️ Editar</button>
+                                <button class="btn-delete" onclick="deletar(${t.id})">🗑️ Deletar</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('list').innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('semana1').addEventListener('change', atualizarSemanas);
+            document.getElementById('semana2').addEventListener('change', atualizarSemanas);
+            document.getElementById('semana3').addEventListener('change', atualizarSemanas);
+            document.getElementById('semana4').addEventListener('change', atualizarSemanas);
+            document.getElementById('semana5').addEventListener('change', atualizarSemanas);
+            
+            atualizarSelectSemanas();
+            mostrar();
+        });
+    </script>
+</body>
+</html>
